@@ -1,0 +1,26 @@
+{
+  "name": "sdk-examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mxcrawford/sdk-examples.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mxcrawford/sdk-examples/issues"
+  },
+  "homepage": "https://github.com/mxcrawford/sdk-examples#readme",
+  "dependencies": {
+    "@types/when": "^2.4.33",
+    "mendixmodelsdk": "^4.25.0",
+    "mendixplatformsdk": "^4.1.1",
+    "when": "^3.7.8"
+  }
+}
