@@ -13,13 +13,12 @@ const mendixplatformsdk_1 = require("mendixplatformsdk");
 const mendixmodelsdk_1 = require("mendixmodelsdk");
 const when = require("when");
 const username = 'alistair.crawford@mendix.com';
-// profile 6a867b72-0ca2-46f2-93ab-d1faac5ef12a
-// app f30d1cd1-6c8c-4580-bebc-6e2cf5fb7999
 const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
 const projectName = 'SDK Showcase';
 const projectId = '2328e9b9-0f08-4f4f-a2a9-18f9719736f2';
 const client = new mendixplatformsdk_1.MendixSdkClient(username, apikey);
 var changes = 0;
+var microflowCount = 0;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Main started and running...");
@@ -32,7 +31,6 @@ function loadMf(microflow) {
     return microflow.load();
 }
 function processMF(realmf, workingCopy) {
-    //const ob = realmf.objectCollection.objects[2];
     realmf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
         .forEach(mfaction => {
         if (mfaction instanceof mendixmodelsdk_1.microflows.ActionActivity) {
@@ -57,8 +55,6 @@ function processMF(realmf, workingCopy) {
                 }
             }
             else {
-                console.info("No matching type");
-                //console.info(mfaction.toJSON());
                 activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Default;
             }
         }
@@ -74,14 +70,16 @@ function processAllMicroflows(workingCopy) {
     return __awaiter(this, void 0, void 0, function* () {
         loadAllMicroflowsAsPromise(workingCopy.model().allMicroflows())
             .then((microflows) => microflows.forEach((mf) => {
-            console.log("Loaded");
-            console.log(mf.isLoaded);
             processMF(mf, workingCopy);
         }))
             .done(() => __awaiter(this, void 0, void 0, function* () {
-            console.info("Done");
-            console.log("Main completed...");
-            const revision = yield workingCopy.commit();
+            if (changes > 0) {
+                console.info("Done MF Processing, made " + changes + " change(s)");
+                const revision = yield workingCopy.commit();
+            }
+            else {
+                console.info("No changes, skipping commit");
+            }
         }));
     });
 }
