@@ -42,7 +42,13 @@ function processMF(realmf: microflows.Microflow, workingCopy: OnlineWorkingCopy)
                         activity.backgroundColor = microflows.ActionActivityColor.Red;
                         changes++;
                     }
-                } else {
+                } else if (action instanceof microflows.MicroflowCallAction) {
+                    if (activity.backgroundColor != microflows.ActionActivityColor.Purple) {
+                        activity.backgroundColor = microflows.ActionActivityColor.Purple;
+                        changes++;
+                    }
+                }  
+                else {
                     activity.backgroundColor = microflows.ActionActivityColor.Default;
                 }
             } else {

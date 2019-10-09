@@ -54,6 +54,12 @@ function processMF(realmf, workingCopy) {
                     changes++;
                 }
             }
+            else if (action instanceof mendixmodelsdk_1.microflows.MicroflowCallAction) {
+                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Purple) {
+                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Purple;
+                    changes++;
+                }
+            }
             else {
                 activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Default;
             }
