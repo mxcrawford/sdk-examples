@@ -11,67 +11,78 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mendixplatformsdk_1 = require("mendixplatformsdk");
 const mendixmodelsdk_1 = require("mendixmodelsdk");
-const internal_1 = require("mendixmodelsdk/dist/sdk/internal");
-const username = 'alistair@wobdev.co.uk';
-const apikey = 'a3deec03-b1de-4ba2-924c-a1809e840e7d';
-const projectName = 'SDKExample';
-const moduleName = 'MyFirstModule';
-const entityName = 'Customer';
-const microflowName = 'IVK_DoStuff';
-const projectId = '46d63de1-8ea5-4f1a-bdf7-eeed30a177f2';
+const when = require("when");
+const username = 'alistair.crawford@mendix.com';
+// profile 6a867b72-0ca2-46f2-93ab-d1faac5ef12a
+// app f30d1cd1-6c8c-4580-bebc-6e2cf5fb7999
+const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
+const projectName = 'SDK Showcase';
+const projectId = '2328e9b9-0f08-4f4f-a2a9-18f9719736f2';
 const client = new mendixplatformsdk_1.MendixSdkClient(username, apikey);
-var commit = false;
+var changes = 0;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Main started and running...");
         const project = new mendixplatformsdk_1.Project(client, projectId, projectName);
         const workingCopy = yield project.createWorkingCopy();
-        // Do Microfows stuff
-        const mf = workingCopy.model().findMicroflowByQualifiedName(moduleName + '.' + microflowName);
-        if (!mf && mf != null) {
-            console.info(workingCopy.model().allFolderBases().length);
-            workingCopy.model().allFolderBases().forEach(folderBase => {
-                console.info(folderBase.id);
-                //const microflow = microflows.Microflow.createIn(folderBase);
-                //commit = true;
-            });
-            console.info(workingCopy.model().allFolderBases().length);
-        }
-        else {
-            console.info('Microflow already exists');
-            console.info(mf.qualifiedName);
-        }
-        const realmf = yield loadMf(mf);
-        console.info(realmf.objectCollection.objects[2].structureTypeName);
-        console.info(realmf.objectCollection.objects.length);
-        const ob = realmf.objectCollection.objects[2];
-        if (ob instanceof mendixmodelsdk_1.microflows.ActionActivity) {
-            const element = ob;
-            console.info("BG Colour: " + element.backgroundColor);
-            console.log(internal_1.LifeCycle.prototype);
-            element.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Red;
-            commit = true;
-            console.info(element.toJSON());
-            console.info("This is an microflows \n");
-        }
-        else {
-            console.info("Not an ActionActivity \n");
-        }
-        try {
-            const revision = yield workingCopy.commit();
-            console.log(`Successfully committed revision: ${revision.num()}. Done.`);
-        }
-        catch (error) {
-            console.error('Something went wrong:', error);
-        }
-        console.log("Main completed...");
+        processAllMicroflows(workingCopy);
     });
-}
-function loadDomainModel(workingCopy) {
-    const dm = workingCopy.model().allDomainModels().filter(dm => dm.containerAsModule.name === 'MyFirstModule')[0];
-    return dm.load();
 }
 function loadMf(microflow) {
     return microflow.load();
+}
+function processMF(realmf, workingCopy) {
+    //const ob = realmf.objectCollection.objects[2];
+    realmf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
+        .forEach(mfaction => {
+        if (mfaction instanceof mendixmodelsdk_1.microflows.ActionActivity) {
+            const activity = mfaction;
+            const action = mfaction.action;
+            if (action instanceof mendixmodelsdk_1.microflows.CreateObjectAction) {
+                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Green) {
+                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Green;
+                    changes++;
+                }
+            }
+            else if (action instanceof mendixmodelsdk_1.microflows.ChangeObjectAction) {
+                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Orange) {
+                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Orange;
+                    changes++;
+                }
+            }
+            else if (action instanceof mendixmodelsdk_1.microflows.DeleteAction) {
+                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Red) {
+                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Red;
+                    changes++;
+                }
+            }
+            else {
+                console.info("No matching type");
+                //console.info(mfaction.toJSON());
+                activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Default;
+            }
+        }
+        else {
+            console.info("Not an activity");
+        }
+    });
+}
+function loadAllMicroflowsAsPromise(microflows) {
+    return when.all(microflows.map(mf => mendixplatformsdk_1.loadAsPromise(mf)));
+}
+function processAllMicroflows(workingCopy) {
+    return __awaiter(this, void 0, void 0, function* () {
+        loadAllMicroflowsAsPromise(workingCopy.model().allMicroflows())
+            .then((microflows) => microflows.forEach((mf) => {
+            console.log("Loaded");
+            console.log(mf.isLoaded);
+            processMF(mf, workingCopy);
+        }))
+            .done(() => __awaiter(this, void 0, void 0, function* () {
+            console.info("Done");
+            console.log("Main completed...");
+            const revision = yield workingCopy.commit();
+        }));
+    });
 }
 main();
