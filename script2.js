@@ -22,20 +22,47 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const project = new mendixplatformsdk_1.Project(client, projectId, projectName);
         const workingCopy = yield project.createWorkingCopy();
-        workingCopy.model().allMicroflows().forEach((microflow) => {
-            console.log(microflow.objectCollection);
-            microflow.load()
-                .then((loadedMf) => {
-                console.log(loadedMf.objectCollection);
-            });
-        });
-        //processAllMicroflows(workingCopy);
+        processAllMicroflows(workingCopy);
     });
 }
 function loadMf(microflow) {
     return microflow.load();
 }
 function processMF(realmf, workingCopy) {
+    console.log('Mf Name: ' + realmf.name);
+    const container = realmf.container;
+    const folderBase = realmf.containerAsFolderBase;
+    //console.log(container.toJSON());
+    if (container instanceof mendixmodelsdk_1.projects.Folder) {
+        console.log("This is a folder");
+        const folder = container;
+        console.log("Folder name: " + folder.name);
+        if (folder.name != "Microflows") {
+            const surroundingFolders = folder.folders;
+            console.log(surroundingFolders.length);
+            const mfFolder = surroundingFolders.filter(fold => fold.name == "Microflows")[0];
+            if (mfFolder) {
+                console.log("Parent folder: " + mfFolder.name);
+                changes++;
+                //Place MF in this folder
+            }
+            else {
+                console.log("Creating new folder...");
+                const newFolder = mendixmodelsdk_1.projects.Folder.createIn(folderBase);
+                newFolder.name = "Microflows";
+                changes++;
+                //Place MF in THIS folder
+            }
+        }
+    }
+    else if (container instanceof mendixmodelsdk_1.projects.Module) {
+        console.log("This is a module");
+        console.log("Creating new folder...");
+        const newFolder = mendixmodelsdk_1.projects.Folder.createIn(folderBase);
+        newFolder.name = "Microflows";
+        //Place MF in THIS folder
+        changes++;
+    }
     realmf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
         .forEach(mfaction => {
         if (mfaction instanceof mendixmodelsdk_1.microflows.ActionActivity) {
@@ -81,6 +108,7 @@ function processAllMicroflows(workingCopy) {
     return __awaiter(this, void 0, void 0, function* () {
         loadAllMicroflowsAsPromise(workingCopy.model().allMicroflows())
             .then((microflows) => microflows.forEach((mf) => {
+            console.log("Processing mf: " + mf.name);
             processMF(mf, workingCopy);
         }))
             .done(() => __awaiter(this, void 0, void 0, function* () {
