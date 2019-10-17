@@ -14,10 +14,13 @@ const mendixmodelsdk_1 = require("mendixmodelsdk");
 const when = require("when");
 const username = 'alistair.crawford@mendix.com';
 const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
-const projectName = 'SDK Examples';
-const projectId = 'cf709443-f12e-4722-b9f3-6ac4d5920689';
+const projectName = 'SDK6';
+const projectId = 'effe3d9a-1bf1-46ae-92f7-f1d2d002d451';
 const client = new mendixplatformsdk_1.MendixSdkClient(username, apikey);
-var changes = 0;
+let changes = 1;
+let prefixes = ["IVK_", "ACT_", "SUB_", "WS_", "ACo_", "ADe_", "BCo_", "BDe_"];
+let moduleList = ["MyFirstModule"];
+let prefixMicroflows = [];
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const project = new mendixplatformsdk_1.Project(client, projectId, projectName);
@@ -28,78 +31,22 @@ function main() {
 function loadMf(microflow) {
     return microflow.load();
 }
-function processMF(realmf, workingCopy) {
-    console.log('Mf Name: ' + realmf.name);
-    const container = realmf.container;
-    const folderBase = realmf.containerAsFolderBase;
+function processMF(microflow, workingCopy) {
+    let myContainer = microflow.container;
+    //console.log(myContainer);
+    while (myContainer instanceof mendixmodelsdk_1.projects.Folder) {
+        myContainer = myContainer.container;
+    }
+    if (myContainer instanceof mendixmodelsdk_1.projects.Module) {
+        let myModule = myContainer;
+        if (moduleList.find((element) => { return element == myModule.name; })) {
+            if (!prefixes.find((element) => { return microflow.name.startsWith(element); })) {
+                prefixMicroflows.push(myModule.name + '.' + microflow.name);
+            }
+        }
+    }
     //console.log(container.toJSON());
-    if (container instanceof mendixmodelsdk_1.projects.Folder) {
-        console.log("This is a folder");
-        const folder = container;
-        console.log("Folder name: " + folder.name);
-        if (folder.name != "Microflows") {
-            const surroundingFolders = folder.folders;
-            console.log(surroundingFolders.length);
-            const mfFolder = surroundingFolders.filter(fold => fold.name == "Microflows")[0];
-            if (mfFolder) {
-                console.log("Parent folder: " + mfFolder.name);
-                changes++;
-                //Place MF in this folder
-            }
-            else {
-                console.log("Creating new folder...");
-                const newFolder = mendixmodelsdk_1.projects.Folder.createIn(folderBase);
-                newFolder.name = "Microflows";
-                changes++;
-                //Place MF in THIS folder
-            }
-        }
-    }
-    else if (container instanceof mendixmodelsdk_1.projects.Module) {
-        console.log("This is a module");
-        console.log("Creating new folder...");
-        const newFolder = mendixmodelsdk_1.projects.Folder.createIn(folderBase);
-        newFolder.name = "Microflows";
-        //Place MF in THIS folder
-        changes++;
-    }
-    realmf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
-        .forEach(mfaction => {
-        if (mfaction instanceof mendixmodelsdk_1.microflows.ActionActivity) {
-            const activity = mfaction;
-            const action = mfaction.action;
-            if (action instanceof mendixmodelsdk_1.microflows.CreateObjectAction) {
-                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Green) {
-                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Green;
-                    changes++;
-                }
-            }
-            else if (action instanceof mendixmodelsdk_1.microflows.ChangeObjectAction) {
-                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Orange) {
-                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Orange;
-                    changes++;
-                }
-            }
-            else if (action instanceof mendixmodelsdk_1.microflows.DeleteAction) {
-                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Red) {
-                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Red;
-                    changes++;
-                }
-            }
-            else if (action instanceof mendixmodelsdk_1.microflows.MicroflowCallAction) {
-                if (activity.backgroundColor != mendixmodelsdk_1.microflows.ActionActivityColor.Purple) {
-                    activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Purple;
-                    changes++;
-                }
-            }
-            else {
-                activity.backgroundColor = mendixmodelsdk_1.microflows.ActionActivityColor.Default;
-            }
-        }
-        else {
-            console.info("Not an activity");
-        }
-    });
+    //const module:projects.Module = realmf.model.;
 }
 function loadAllMicroflowsAsPromise(microflows) {
     return when.all(microflows.map(mf => mendixplatformsdk_1.loadAsPromise(mf)));
@@ -108,16 +55,20 @@ function processAllMicroflows(workingCopy) {
     return __awaiter(this, void 0, void 0, function* () {
         loadAllMicroflowsAsPromise(workingCopy.model().allMicroflows())
             .then((microflows) => microflows.forEach((mf) => {
-            console.log("Processing mf: " + mf.name);
+            //console.log("Processing mf: " + mf.name);
             processMF(mf, workingCopy);
         }))
             .done(() => __awaiter(this, void 0, void 0, function* () {
             if (changes > 0) {
-                console.info("Done MF Processing, made " + changes + " change(s)");
-                const revision = yield workingCopy.commit();
+                //console.info("Done MF Processing, made " + changes + " change(s)");
+                //const revision = await workingCopy.commit();
+                console.log("Microflows missing prefixes: " + prefixMicroflows.length);
+                prefixMicroflows.forEach((item) => {
+                    console.log(item);
+                });
             }
             else {
-                console.info("No changes, skipping commit");
+                //console.info("No changes, skipping commit");
             }
         }));
     });

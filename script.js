@@ -14,29 +14,22 @@ const mendixmodelsdk_1 = require("mendixmodelsdk");
 const when = require("when");
 const username = 'alistair.crawford@mendix.com';
 const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
-const projectName = 'SDK Examples';
-const projectId = 'cf709443-f12e-4722-b9f3-6ac4d5920689';
+const projectName = 'SDK6';
+const projectId = 'effe3d9a-1bf1-46ae-92f7-f1d2d002d451';
 const client = new mendixplatformsdk_1.MendixSdkClient(username, apikey);
 var changes = 0;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const project = new mendixplatformsdk_1.Project(client, projectId, projectName);
         const workingCopy = yield project.createWorkingCopy();
-        workingCopy.model().allMicroflows().forEach((microflow) => {
-            console.log(microflow.objectCollection);
-            microflow.load()
-                .then((loadedMf) => {
-                console.log(loadedMf.objectCollection);
-            });
-        });
-        //processAllMicroflows(workingCopy);
+        processAllMicroflows(workingCopy);
     });
 }
 function loadMf(microflow) {
     return microflow.load();
 }
-function processMF(realmf, workingCopy) {
-    realmf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
+function processMF(mf, workingCopy) {
+    mf.objectCollection.objects.filter(mfaction => mfaction.structureTypeName == 'Microflows$ActionActivity')
         .forEach(mfaction => {
         if (mfaction instanceof mendixmodelsdk_1.microflows.ActionActivity) {
             const activity = mfaction;

@@ -1,15 +1,15 @@
 import { MendixSdkClient, OnlineWorkingCopy, Project, loadAsPromise } from 'mendixplatformsdk';
-import { microflows } from 'mendixmodelsdk';
+import { microflows ,jsonstructures} from 'mendixmodelsdk';
 import when = require("when");
 
 const username = 'alistair.crawford@mendix.com';
 const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
-const projectName = 'SDK Examples';
-const projectId = 'cf709443-f12e-4722-b9f3-6ac4d5920689';
+const projectName = 'SDK6';
+const projectId = 'effe3d9a-1bf1-46ae-92f7-f1d2d002d451';
 const client = new MendixSdkClient(username, apikey);
 var changes = 0;
 
-async function main(){
+async function main() {
     const project = new Project(client, projectId, projectName);
     const workingCopy = await project.createWorkingCopy();
     processAllMicroflows(workingCopy);
@@ -45,7 +45,7 @@ function processMF(mf: microflows.Microflow, workingCopy: OnlineWorkingCopy) {
                         activity.backgroundColor = microflows.ActionActivityColor.Purple;
                         changes++;
                     }
-                }  
+                }
                 else {
                     activity.backgroundColor = microflows.ActionActivityColor.Default;
                 }
@@ -65,7 +65,7 @@ async function processAllMicroflows(workingCopy: OnlineWorkingCopy) {
             processMF(mf, workingCopy);
         }))
         .done(async () => {
-            if(changes > 0){
+            if (changes > 0) {
                 console.info("Done MF Processing, made " + changes + " change(s)");
                 const revision = await workingCopy.commit();
             } else {
