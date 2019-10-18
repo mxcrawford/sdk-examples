@@ -16,7 +16,7 @@ Install project dependencies by running the following command
 
 ## Configuration
 
-In the src folder, create a file config.json (see config.json.example for a sample).
+Inside each of the scripts there is a config section as below:
 
 ### auth
 
@@ -39,9 +39,8 @@ In the src folder, create a file config.json (see config.json.example for a samp
 {
     ...
     "project":{
-        "id":"",
         "name":"",
-        "branch": ""
+        "id":""
     }
     ...
 }
@@ -51,15 +50,11 @@ In the src folder, create a file config.json (see config.json.example for a samp
 
 **project.name**: The name of your project
 
-**project.branch**: The name of the branch you want to use (or empty string for the main line)  
-
 ## Run the script
 Compile and run the script by running the following command:
 
-`npm start`
+* Analysing your model
+node build\script1.js
 
-The script will do the following:
-
-- create a folder called 'out' if it doesn't already exist
-- create a folder named after the project. If one already exists the script will exit. 
-- iterate over every ModuleSecurity and ModuleDocument object and store them in module specific sub folders under the project.
+* Changing Microflow Background colours
+node build\script2.js
