@@ -18,6 +18,10 @@ Install project dependencies by running the following command
 
 Inside each of the scripts there is a config section as below:
 
+``` 
+src\script1.ts, src\script2.js 
+```
+
 ### auth
 
 ```
