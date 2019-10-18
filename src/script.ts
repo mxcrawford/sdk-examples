@@ -2,15 +2,22 @@ import { MendixSdkClient, OnlineWorkingCopy, Project, loadAsPromise } from 'mend
 import { microflows ,jsonstructures} from 'mendixmodelsdk';
 import when = require("when");
 
-const username = 'alistair.crawford@mendix.com';
-const apikey = '6a867b72-0ca2-46f2-93ab-d1faac5ef12a';
-const projectName = 'SDK6';
-const projectId = 'effe3d9a-1bf1-46ae-92f7-f1d2d002d451';
-const client = new MendixSdkClient(username, apikey);
+const config = {
+    auth : {
+        "username":"alistair.crawford@mendix.com",
+        "apikey":"6a867b72-0ca2-46f2-93ab-d1faac5ef12a"
+    },
+    project : {
+        "projectName": "SDK6",
+        "projectId":"effe3d9a-1bf1-46ae-92f7-f1d2d002d451"
+    }
+}
+
+const client = new MendixSdkClient(config.auth.username, config.auth.apikey);
 var changes = 0;
 
 async function main() {
-    const project = new Project(client, projectId, projectName);
+    const project = new Project(client, config.project.projectId, config.project.projectName);
     const workingCopy = await project.createWorkingCopy();
     processAllMicroflows(workingCopy);
 }
