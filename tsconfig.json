@@ -62,5 +62,5 @@
     // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
   },
-  "files": ["src/script.ts","src/script2.ts"]
+  "files": ["src/script2.ts","src/script1.ts"]
 }
