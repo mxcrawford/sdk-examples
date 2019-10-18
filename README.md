@@ -58,7 +58,13 @@ src\script1.ts, src\script2.js
 Compile and run the script by running the following command:
 
 * Analysing your model
+
+``` 
 node build\script1.js
+```
 
 * Changing Microflow Background colours
+
+``` 
 node build\script2.js
+```
